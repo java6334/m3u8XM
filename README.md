@@ -18,13 +18,13 @@ Credits to [andrew0](https://github.com/andrew0) for the basis of this script.
 Clone the project
 
 ```bash
-  git clone https://github.com/Unverifiedd/m3u8XM
+git clone https://github.com/Unverifiedd/m3u8XM
 ```
 
 Go to the project directory
 
 ```bash
-  cd m3u8XM
+cd m3u8XM
 ```
 
 ### Add your config file
@@ -33,7 +33,7 @@ rename ``config.example.ini`` to ``config.ini`` and edit the email/password to y
 Start the server
 
 ```bash
-  python sxm.py
+python sxm.py
 ```
 
 
