@@ -12,6 +12,7 @@ Credits to [andrew0](https://github.com/andrew0) for the basis of this script.
 - Creates a full channel playlist
 - Support for channel logos & genre filtering
 - Xtra streams supported
+- Automatically downloads a M3U file in the m3u8XM directory
 
 ## Run Locally
 
