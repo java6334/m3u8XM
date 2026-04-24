@@ -22,13 +22,7 @@ Clone the project
 git clone https://github.com/jhr1948/m3u8XM
 ```
 
-Go to the project directory
-
-```bash
-cd m3u8XM
-```
-
-### Add your config file
+### EDIT your config file
 Don't forget to rename ``config.example.ini`` to ``config.ini`` and edit the email or username & password to your SXM account.
 
 ### config file IP & playlist_host examples
@@ -46,6 +40,12 @@ playlist_host = 100.x.x.x
 # Reverse proxy setup
 ip = 127.0.0.1
 playlist_host = stream.yourdomain.com
+```
+
+Go to the project directory
+
+```bash
+cd m3u8XM
 ```
 
 Start the server
