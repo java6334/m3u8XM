@@ -490,7 +490,7 @@ def make_sirius_handler(sxm):
     class SiriusHandler(BaseHTTPRequestHandler):
         def safe_write(self, data):
             try:
-                self.safe_write(data)
+                self.wfile.write(data)
             except (BrokenPipeError, ConnectionResetError):
                 # Media players often open, cancel, and retry requests while
                 # probing HLS streams. Do not treat that as a server error.
