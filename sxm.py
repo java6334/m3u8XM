@@ -5,6 +5,7 @@ import urllib.parse
 import json
 import time, datetime
 import sys
+import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import configparser
 config = configparser.ConfigParser()
@@ -18,7 +19,12 @@ class SiriusXM:
 
     def __init__(self, username, password):
         self.session = requests.Session()
-        self.session.headers.update({'User-Agent': self.USER_AGENT})
+        self.session.headers.update({
+            'User-Agent': self.USER_AGENT,
+            'Accept': 'application/json',
+            'Origin': 'https://www.siriusxm.com',
+            'Referer': 'https://www.siriusxm.com/',
+        })
         self.username = username
         self.password = password
         self.playlists = {}
@@ -112,6 +118,9 @@ class SiriusXM:
             return None
 
         if res.status_code != 200 and res.status_code != 201:
+            # Only retry authentication for calls that actually require auth.
+            # login() uses post(..., authenticate=False), so retrying login there
+            # would recurse forever if SXM returns a 4xx during device setup.
             if 400 <= res.status_code < 500 and authenticate:
                 self.log("POST {} returned {}. Reauthenticating.".format(method, res.status_code))
                 self.login()
@@ -580,7 +589,11 @@ def make_sirius_handler(sxm):
 
 
 if __name__ == '__main__':
-    config.read('config.ini')
+    config_path = os.environ.get('CONFIG_PATH', 'config.ini')
+    loaded_configs = config.read(config_path)
+    if not loaded_configs:
+        print("Error: unable to read config file '{}'.".format(config_path))
+        sys.exit(1)
 
     email = config.get("account", "email", fallback="example@example.com").strip()
     username = config.get("account", "username", fallback="example").strip()
@@ -612,10 +625,20 @@ if __name__ == '__main__':
     playlist = sxm.get_playlist()
     playlist = playlist.replace('/listen/', f'http://{playlist_host}:{port}/listen/')
 
-    with open("siriusxm.m3u", "w", encoding="utf-8") as f:
+    playlist_output = config.get(
+        "settings",
+        "playlist_output",
+        fallback=os.environ.get("PLAYLIST_OUTPUT", "siriusxm.m3u")
+    ).strip()
+
+    playlist_dir = os.path.dirname(playlist_output)
+    if playlist_dir:
+        os.makedirs(playlist_dir, exist_ok=True)
+
+    with open(playlist_output, "w", encoding="utf-8") as f:
         f.write(playlist)
 
-    print("Saved playlist to siriusxm.m3u")
+    print("Saved playlist to {}".format(playlist_output))
 
     httpd = HTTPServer((ip, port), make_sirius_handler(sxm))
     try:
