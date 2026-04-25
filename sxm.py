@@ -622,8 +622,16 @@ if __name__ == '__main__':
     if playlist_host == "0.0.0.0":
         playlist_host = "127.0.0.1"
 
+    playlist_scheme = config.get("settings", "playlist_scheme", fallback="http").strip() or "http"
+    playlist_port = config.get("settings", "playlist_port", fallback=str(port)).strip()
+
+    if playlist_port:
+        playlist_base_url = f"{playlist_scheme}://{playlist_host}:{playlist_port}"
+    else:
+        playlist_base_url = f"{playlist_scheme}://{playlist_host}"
+
     playlist = sxm.get_playlist()
-    playlist = playlist.replace('/listen/', f'http://{playlist_host}:{port}/listen/')
+    playlist = playlist.replace('/listen/', f'{playlist_base_url}/listen/')
 
     playlist_output = config.get(
         "settings",
