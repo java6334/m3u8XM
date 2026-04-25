@@ -92,6 +92,77 @@ sudo systemctl enable m3u8XM      # Set to start on boot
 sudo systemctl start m3u8XM       # Start it now
 ```
 
+## Docker Compose setup
+Create a working directory:
+```
+mkdir -p m3u8xm/output
+cd m3u8xm
+```
+Your folder should contain:
+```
+m3u8xm/
+├── sxm.py
+├── config.ini
+├── Dockerfile
+├── requirements.txt
+└── output/
+```
+requirements.txt
+```
+requests
+```
+Dockerfile
+```
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY sxm.py .
+
+EXPOSE 8888
+
+CMD ["python", "-u", "sxm.py"]
+```
+config.ini (example) (make sure to use above ini exeamples for reverse proxy)
+```
+[account]
+email = your_email@example.com
+username = example
+password = your_password
+
+[settings]
+ip = 0.0.0.0
+port = 8888
+playlist_host = 192.168.x.x
+playlist_scheme = http
+playlist_port = 8888
+playlist_output = /app/output/siriusxm.m3u
+```
+Build the Docker Image (one-time)
+```
+docker build -t m3u8xm:latest .
+```
+docker-compose.yml
+```
+services:
+  m3u8xm:
+    image: m3u8xm:latest
+    container_name: m3u8xm
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config.ini:/app/config.ini:ro
+      - ./output:/app/output
+```
+Start the Container
+```
+docker compose up -d
+```
+
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
