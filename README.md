@@ -14,8 +14,6 @@ Credits to [andrew0](https://github.com/andrew0) for the basis of this script.
 - Xtra streams supported
 - Automatically downloads a M3U file in the m3u8XM directory
 
-## Run Locally
-
 Clone the project
 
 ```bash
@@ -28,18 +26,33 @@ Don't forget to rename ``config.example.ini`` to ``config.ini`` and edit the ema
 ### config file IP & playlist_host examples
 ```
 # Home LAN with the playlist_host IP being the computer running m3u8XM
+[settings]
 ip = 0.0.0.0
+port = 8888
 playlist_host = 192.168.x.x
+playlist_scheme = http
+playlist_port = 8888
+playlist_output = /app/output/siriusxm.m3u
 ```
 ```
 # Tailscale with playlist_host IP using the Tailscale IP address
+[settings]
 ip = 0.0.0.0
+port = 8888
 playlist_host = 100.x.x.x
+playlist_scheme = http
+playlist_port = 8888
+playlist_output = /app/output/siriusxm.m3u
 ```
 ```
 # Reverse proxy setup
-ip = 127.0.0.1
+[settings]
+ip = 0.0.0.0
+port = 8888
 playlist_host = stream.yourdomain.com
+playlist_scheme = https
+playlist_port =
+playlist_output = /app/output/siriusxm.m3u
 ```
 
 Go to the project directory
