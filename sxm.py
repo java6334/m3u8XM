@@ -91,33 +91,47 @@ class SiriusXM:
             self.log('Error decoding json for method \'{}\''.format(method))
             return None
 
-    def post(self, method, postdata, authenticate=True, headers={},retries=0):
+    def post(self, method, postdata, authenticate=True, headers={}, retries=0):
         if retries >= 3:
             self.log("Max retries hit on {} using method Post".format(method))
             return None
+
         if authenticate and not self.is_session_authenticated() and not self.authenticate():
             self.log('Unable to authenticate')
             return None
 
-        res = self.session.post(self.REST_FORMAT.format(method), data=json.dumps(postdata),headers=headers)
+        try:
+            res = self.session.post(
+                self.REST_FORMAT.format(method),
+                data=json.dumps(postdata),
+                headers=headers,
+                timeout=15
+            )
+        except requests.RequestException as e:
+            self.log("POST request failed for {}: {}".format(method, e))
+            return None
+
         if res.status_code != 200 and res.status_code != 201:
-            if res.status_code >= 400 and res.status_code < 500:
+            if 400 <= res.status_code < 500 and authenticate:
+                self.log("POST {} returned {}. Reauthenticating.".format(method, res.status_code))
                 self.login()
                 self.authenticate()
-                return self.post(method,postdata,authenticate,headers,retries+1)
+                return self.post(method, postdata, authenticate, headers, retries + 1)
+
             self.log('Received status code {} for method \'{}\''.format(res.status_code, method))
             return None
 
-        resjson = res.json()
-        bearer_token = resjson["grant"] if "grant" in resjson else resjson["accessToken"] if "accessToken" in resjson else None
-        if bearer_token != None:
-            self.session.headers.update({"Authorization": f"Bearer {bearer_token}"})
-
         try:
-            return resjson
+            resjson = res.json()
         except ValueError:
             self.log('Error decoding json for method \'{}\''.format(method))
             return None
+
+        bearer_token = resjson.get("grant") or resjson.get("accessToken")
+        if bearer_token:
+            self.session.headers.update({"Authorization": f"Bearer {bearer_token}"})
+
+        return resjson
 
     def login(self):
         # Four layer process
@@ -130,7 +144,12 @@ class SiriusXM:
 
         # do a completely new session
         self.session = requests.Session()
-        self.session.headers.update({'User-Agent': self.USER_AGENT})
+        self.session.headers.update({
+            'User-Agent': self.USER_AGENT,
+            'Accept': 'application/json',
+            'Origin': 'https://www.siriusxm.com',
+            'Referer': 'https://www.siriusxm.com/',
+        })
 
         postdata = {
             'devicePlatform': "web-desktop",
@@ -147,7 +166,11 @@ class SiriusXM:
             'grantVersion': 'v2'
         }
         sxmheaders = {
-            "x-sxm-tenant":"sxm" # required, but not used everywhere
+            "x-sxm-tenant": "sxm",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Origin": "https://www.siriusxm.com",
+            "Referer": "https://www.siriusxm.com/",
         }
         data = self.post('device/v1/devices', postdata, authenticate=False,headers=sxmheaders)
         if not data:
