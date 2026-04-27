@@ -19,6 +19,14 @@ CHANNEL_GROUP_OVERRIDES = {
     "1308": "Workout",  # Alt Workout
     "1302": "Party",  # Oldies Party
     "1085": "The 70s Decade",  # 70s on 7 Dance/R&B
+    "1177": "The 70s Decade",  # 70s on 7 Just Music
+    "739": "Country",  # Savior Sunday Daily by Carrie's Country
+}
+
+# Optional UUID-based x-sxm-type overrides. Use this only if both the
+# authenticated browse API and public /channels page disagree with reality.
+# Add entries as "channel-uuid": "channel-xtra" or "channel-linear".
+CHANNEL_TYPE_OVERRIDES = {
 }
 
 class SiriusXM:
@@ -382,11 +390,53 @@ class SiriusXM:
             return self.public_channels
 
 
+    def _authenticated_type_by_uuid(self):
+        # Build a UUID -> authenticated API channel_type map. The public
+        # /channels page has better names/groups, but the authenticated browse
+        # API has proven more reliable for whether a UUID is channel-linear
+        # or channel-xtra.
+        lookup = {}
+        if not self.channels:
+            self.get_channels()
+        for channel in self.channels or []:
+            channel_uuid = channel.get("id")
+            channel_type = channel.get("channel_type")
+            if channel_uuid and channel_type:
+                lookup[str(channel_uuid)] = channel_type
+        return lookup
+
+    def _resolve_m3u_channel_type(self, original_channel, public_override, auth_type_by_uuid):
+        # Priority:
+        # 1) manual UUID override
+        # 2) authenticated API type for the final UUID
+        # 3) authenticated API type for the original UUID
+        # 4) public /channels xtra_channel-derived type
+        # 5) original/fallback linear type
+        public_uuid = public_override.get("id") if isinstance(public_override, dict) else None
+        original_uuid = original_channel.get("id")
+
+        for channel_uuid in (public_uuid, original_uuid):
+            if channel_uuid and str(channel_uuid) in CHANNEL_TYPE_OVERRIDES:
+                return CHANNEL_TYPE_OVERRIDES[str(channel_uuid)]
+
+        if public_uuid and str(public_uuid) in auth_type_by_uuid:
+            return auth_type_by_uuid[str(public_uuid)]
+
+        if original_uuid and str(original_uuid) in auth_type_by_uuid:
+            return auth_type_by_uuid[str(original_uuid)]
+
+        if isinstance(public_override, dict) and public_override.get("channel_type"):
+            return public_override.get("channel_type")
+
+        return original_channel.get("channel_type", "channel-linear")
+
+
     def get_playlist(self):
         if not self.channels:
             self.get_channels()
         if not self.m3u8dat:
             public_map = self.fetch_public_channels()
+            auth_type_by_uuid = self._authenticated_type_by_uuid()
             data = []
             data.append("#EXTM3U")
             m3umetadata = """#EXTINF:-1 tvg-id="{}" tvg-chno="{}" tvg-logo="{}" group-title="{}" x-sxm-type="{}",{}\n{}"""
@@ -397,15 +447,22 @@ class SiriusXM:
                 title = override.get("title") or channel["title"]
                 genre = override.get("genre") or channel["genre"] or "Other"
                 logo = channel["logo"]
-                channel_type = override.get("channel_type") or channel.get("channel_type", "channel-linear")
                 channel_uuid = override.get("id") or channel["id"]
+                channel_type = self._resolve_m3u_channel_type(channel, override, auth_type_by_uuid)
 
                 # SiriusXM's authenticated browse API occasionally returns an
                 # incorrect decorations.genre. The public channels page is used
                 # first when available; this manual map remains as a final fallback.
                 genre = CHANNEL_GROUP_OVERRIDES.get(str(channel_id), genre)
 
-                group_title = "{} XTRA".format(genre) if channel_type == "channel-xtra" else genre
+                if channel_type == "channel-xtra":
+                    if genre.strip().lower() == "all xtra":
+                        group_title = "All XTRA"
+                    else:
+                        group_title = "{} XTRA".format(genre)
+                else:
+                    group_title = genre
+
                 url = "/listen/{}".format(channel_uuid)
                 formattedm3udata = m3umetadata.format(channel_id, num, logo, group_title, channel_type, title, url)
                 data.append(formattedm3udata)
