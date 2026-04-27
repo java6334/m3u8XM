@@ -54,7 +54,14 @@ playlist_scheme = https
 playlist_port =
 playlist_output = /app/output/siriusxm.m3u
 ```
-
+## You can leave the default config lines below along
+```
+## You can leave lines below defaulted
+xtra_queue_tracks = 6
+xtra_extend_threshold = 0.70
+xtra_playlist_max_age = 21600
+xtra_session_ttl = 25200
+```
 Go to the project directory
 
 ```bash
