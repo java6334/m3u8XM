@@ -1328,9 +1328,11 @@ class SiriusXM:
         if total_duration <= 0:
             total_duration = total_duration_ms / 1000.0 if total_duration_ms else ((self.xtra_metadata.get(channel_id, {}).get("durationMs", 0) or 30000) / 1000.0 * len(tracks))
 
+        now_ts = time.time()
         self.xtra_playlists[channel_id] = {
             "data": rewritten,
-            "started": time.time(),
+            "started": now_ts,
+            "last_access": now_ts,
             "duration": total_duration,
             "durationMs": total_duration_ms,
             "sessionId": tracks[0].get("sessionId", ""),
@@ -1376,7 +1378,10 @@ class SiriusXM:
             rebuild_from_next = False
 
             if cached:
-                elapsed = time.time() - cached.get("started", 0)
+                now = time.time()
+                elapsed = now - cached.get("started", 0)
+                last_access = cached.get("last_access", cached.get("started", 0))
+                idle_time = now - last_access
                 total_duration = cached.get("duration", 0) or 0
                 segments = cached.get("segments", [])
                 served_count = cached.get("served_count", len(cached.get("served", set())))
@@ -1384,8 +1389,13 @@ class SiriusXM:
                 threshold = float(getattr(self, "xtra_extend_threshold", 0.70))
                 max_age = int(getattr(self, "xtra_playlist_max_age", 21600))
 
-                if elapsed > max_age or cached.get("served_last", False):
-                    self.log("XTRA stitched playlist expired for {}; rebuilding from next track after {:.1f}s".format(id, elapsed))
+                # Treat xtra_playlist_max_age as an IDLE timeout, not an active-playback
+                # timeout. A stitched XTRA playlist can be valid and actively playing
+                # longer than max_age; rebuilding it just because it is old can cut a
+                # song mid-stream. Only expire stale queues after no segment requests
+                # have been seen for max_age seconds.
+                if idle_time > max_age or cached.get("served_last", False):
+                    self.log("XTRA stitched playlist expired for {}; rebuilding from next track after {:.1f}s idle ({:.1f}s old)".format(id, idle_time, elapsed))
                     self.xtra_playlists.pop(id, None)
                     rebuild_from_next = True
                 elif consumed_ratio >= threshold:
@@ -1452,6 +1462,7 @@ class SiriusXM:
             if data and is_xtra:
                 cached = self.xtra_playlists.get(id)
                 if cached is not None:
+                    cached["last_access"] = time.time()
                     clean_seg = seg.split('?', 1)[0]
                     served = cached.setdefault("served", set())
                     served.add(clean_seg)
