@@ -59,7 +59,7 @@ playlist_output = /app/output/siriusxm.m3u
 ## You can leave lines below defaulted
 xtra_queue_tracks = 6
 xtra_extend_threshold = 0.70
-xtra_playlist_max_age = 21600
+xtra_playlist_max_age = 900
 xtra_session_ttl = 25200
 ```
 Go to the project directory
