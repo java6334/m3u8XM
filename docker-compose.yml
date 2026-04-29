@@ -1,6 +1,6 @@
 services:
   m3u8XM:
-    image: ghcr.io/java6334/m3u8XM:latest
+    image: ghcr.io/java6334/m3u8xm:latest
     container_name: m3u8XM
     restart: unless-stopped
     ports:
