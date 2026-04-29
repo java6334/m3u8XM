@@ -1,6 +1,7 @@
 # M3U8 XM
-A WIP script that converts SiriusXM's web app into a M3U8 file.
-Credits to [andrew0](https://github.com/andrew0) for the basis of this script.
+A Docker Container that converts SiriusXM's web app into an M3U8 file.
+Credits to [jhr1948](https://github.com/jhr1948) for the updates of this script.
+This project is not affiliated with SiriusXM.
 
 
 ## Features
@@ -59,7 +60,3 @@ Don't forget to rename ``config.example.ini`` to ``config.ini`` and edit the ema
 ```
 docker compose up -d
 ```
-
-
-
-This project is not affiliated with SiriusXM.
