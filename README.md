@@ -10,20 +10,24 @@ Credits to [andrew0](https://github.com/andrew0) for the basis of this script.
 - Xtra streams supported.
 - Automatically downloads a M3U file in the m3u8xm directory.
 
+
 ## Create Project Directory:
 ```bash
 mkdir -p m3u8xm
 ```
+
 
 ## Go To Project Directory:
 ```bash
 cd m3u8xm
 ```
 
+
 ## Clone The Project:
 ```bash
 git clone https://github.com/java6334/m3u8XM
 ```
+
 
 ## Edit Your Configuration File:
 Don't forget to rename ``config.example.ini`` to ``config.ini`` and edit the email or username & password to your SXM account!
@@ -45,10 +49,12 @@ xtra_playlist_max_age = 900
 xtra_session_ttl = 25200
 ```
 
+
 ## Start The Container:
 ```
 docker compose up -d
 ```
+
 
 
 This project is not affiliated with SiriusXM.
