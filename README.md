@@ -30,6 +30,12 @@ git clone https://github.com/java6334/m3u8XM
 
 
 ## Edit Your Configuration File:
+```
+[account]
+email = example@example.com
+username = example
+password = password123
+```
 Don't forget to rename ``config.example.ini`` to ``config.ini`` and edit the email or username & password to your SXM account!
 
 ## Configure IP Settings:
