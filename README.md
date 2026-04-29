@@ -51,4 +51,4 @@ docker compose up -d
 ```
 
 
-## This project is not affiliated with SiriusXM.
+This project is not affiliated with SiriusXM.
