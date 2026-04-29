@@ -11,7 +11,7 @@ jobs:
 
     permissions:
       contents: write
-      packages: write     # ← This is the important line
+      packages: write
 
     steps:
       - name: Checkout code
