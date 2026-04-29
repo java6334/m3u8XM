@@ -41,7 +41,7 @@ username = example
 password = password123
 
 [settings]
-ip = x.x.x.x  # Your VPS IP address goes here.
+ip = 0.0.0.0
 port = 8888
 playlist_host = x.x.x.x  # Your VPS IP address goes here.
 playlist_scheme = http
