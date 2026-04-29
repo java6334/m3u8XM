@@ -1,7 +1,7 @@
 # M3U8 XM
-A Docker Container that converts SiriusXM's web app into an M3U8 file.
-Credits to [jhr1948](https://github.com/jhr1948) for the updates of this script.
-This project is not affiliated with SiriusXM.
+- A Docker Container that converts SiriusXM's web app into an M3U8 file.
+- Credits to [jhr1948](https://github.com/jhr1948) for the updates of this script.
+- This project is not affiliated with SiriusXM.
 
 
 ## Features
