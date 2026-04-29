@@ -1,0 +1,10 @@
+services:
+  m3u8XM:
+    image: ghcr.io/java6334/m3u8XM:latest
+    container_name: m3u8XM
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config.ini:/app/config.ini:ro
+      - ./output:/app/output
