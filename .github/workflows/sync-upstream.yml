@@ -1,26 +1,52 @@
-name: Sync Upstream Every 3 Hours
+name: 'Upstream Sync'
 
 on:
   schedule:
-    - cron: '0 */3 * * *'      # Runs every 3 hours
-  workflow_dispatch:           # Allows manual trigger
+    - cron: '0 */3 * * *'
+
+  workflow_dispatch:
+    inputs:
+      sync_test_mode: # Adds a boolean option that appears during manual workflow run for easy test mode config
+        description: 'Fork Sync Test Mode'
+        type: boolean
+        default: false
 
 jobs:
-  sync:
+  sync_latest_from_upstream:
     runs-on: ubuntu-latest
+    name: Sync latest commits from upstream repo
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    - name: Checkout target repo
+      uses: actions/checkout@v3
+      with:
+        # optional: set the branch to checkout,
+        # sync action checks out your 'target_sync_branch' anyway
+        ref:  my-branch
+        # REQUIRED if your upstream repo is private (see wiki)
+        persist-credentials: false
 
-      - name: Sync with Upstream
-        uses: aormsby/Fork-Sync-With-Upstream-action@v1
-        with:
-          upstream_repository: jhr1948/m3u8XM
-          upstream_branch: main
-          target_branch: main
-          github_token: ${{ secrets.DOCKER_PAT }}
-          # This helps preserve your custom changes during merge
-          merge_method: merge
+    - name: Sync upstream changes
+      id: sync
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
+      with:
+        target_sync_branch: my-branch
+        # REQUIRED 'target_repo_token' exactly like this!
+        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+        upstream_sync_branch: main
+        upstream_sync_repo: aormsby/Fork-Sync-With-Upstream-action
+        upstream_repo_access_token: ${{ secrets.UPSTREAM_REPO_SECRET }}
+
+        # Set test_mode true during manual dispatch to run tests instead of the true action!!
+        test_mode: ${{ inputs.sync_test_mode }}
+      
+    - name: New commits found
+      if: steps.sync.outputs.has_new_commits == 'true'
+      run: echo "New commits were found to sync."
+    
+    - name: No new commits
+      if: steps.sync.outputs.has_new_commits == 'false'
+      run: echo "There were no new commits."
+      
+    - name: Show value of 'has_new_commits'
+      run: echo ${{ steps.sync.outputs.has_new_commits }}
