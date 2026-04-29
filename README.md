@@ -35,18 +35,14 @@ nano config.example.ini
 ```
 ```
 [account]
-email = example@example.com
+email = example@example.com  # Use email address instead of username if you are able to.
 username = example
 password = password123
-```
-Don't forget to rename ``config.example.ini`` to ``config.ini`` and edit the email or username & password to your SXM account!
 
-## Configure IP Settings:
-```
 [settings]
-ip = x.x.x.x # Your VPS IP address goes here.
+ip = x.x.x.x  # Your VPS IP address goes here.
 port = 8888
-playlist_host = x.x.x.x # Your VPS IP address goes here.
+playlist_host = x.x.x.x  # Your VPS IP address goes here.
 playlist_scheme = http
 playlist_port = 8888
 playlist_output = /app/output/siriusxm.m3u
@@ -57,7 +53,7 @@ xtra_extend_threshold = 0.70
 xtra_playlist_max_age = 900
 xtra_session_ttl = 25200
 ```
-
+Don't forget to rename ``config.example.ini`` to ``config.ini`` and edit the email or username & password to your SXM account!
 
 ## Start The Container:
 ```
