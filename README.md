@@ -30,6 +30,9 @@ git clone https://github.com/java6334/m3u8XM
 
 
 ## Edit Your Configuration File:
+```bash
+nano config.example.ini
+```
 ```
 [account]
 email = example@example.com
