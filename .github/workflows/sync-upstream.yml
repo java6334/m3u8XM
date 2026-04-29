@@ -1,0 +1,26 @@
+name: Sync Upstream Every 3 Hours
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'      # Runs every 3 hours
+  workflow_dispatch:           # Allows manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync with Upstream
+        uses: aormsby/Fork-Sync-With-Upstream-action@v1
+        with:
+          upstream_repository: jhr1948/m3u8XM
+          upstream_branch: main
+          target_branch: main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # This helps preserve your custom changes during merge
+          merge_method: merge
