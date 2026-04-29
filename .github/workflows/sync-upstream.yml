@@ -21,6 +21,6 @@ jobs:
           upstream_repository: jhr1948/m3u8XM
           upstream_branch: main
           target_branch: main
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.DOCKER_PAT }}
           # This helps preserve your custom changes during merge
           merge_method: merge
